@@ -113,6 +113,7 @@ def main():
     BaseSpeechReceiverModule.start()
 
     if(False):
+        print("False, auto-detection not available")
         #one-shot recording for at least 5 seconds
         SpeechRecognition = ALProxy("SpeechRecognition")
         SpeechRecognition.start()
@@ -122,6 +123,7 @@ def main():
         SpeechRecognition.startRecording()
 
     else:
+        print("True, auto-detection selected")
         # auto-detection
         SpeechRecognition = ALProxy("SpeechRecognition")
         SpeechRecognition.start()

@@ -168,6 +168,7 @@ class SpeechRecognitionModule(naoqi.ALModule):
                     # start recording if we are not doing so already
                     if (self.isAutoDetectionEnabled and not self.isRecording and not self.isCalibrating):
                         self.startRecording()
+                        print("threshold surpassed: " + str(rmsMicFront) + " more than " + str(self.autoDetectionThreshold))
 
                 # perform calibration
                 if( self.isCalibrating):
@@ -342,8 +343,8 @@ class SpeechRecognitionModule(naoqi.ALModule):
         self.isCalibrating = False
 
         # calculate avg rms over self.framesCount
-        self.threshold = CALIBRATION_THRESHOLD_FACTOR * (self.rmsSum / self.framesCount)
-        print 'calibration done, RMS threshold is: ' + str(self.threshold)
+        self.autoDetectionThreshold = CALIBRATION_THRESHOLD_FACTOR * (self.rmsSum / self.framesCount)
+        print 'calibration done, RMS threshold is: ' + str(self.autoDetectionThreshold)
         return
 
     def enableAutoDetection(self):
@@ -353,10 +354,12 @@ class SpeechRecognitionModule(naoqi.ALModule):
 
     def disableAutoDetection(self):
         self.isAutoDetectionEnabled = False
+        print 'INF: AutoDetection Disabled '
         return
 
     def setLanguage(self, language = DEFAULT_LANGUAGE):
         self.language = language
+        print 'SET: language set to ' + language
         return
 
     # used for RMS calculation
@@ -404,9 +407,10 @@ class SpeechRecognitionModule(naoqi.ALModule):
         try:
             result = r.recognize_google(audio_data=buffer, samplerate=SAMPLE_RATE, language=self.language)
             self.memory.raiseEvent("SpeechRecognition", result)
-            print 'RESULT: ' + result
+            print '---RESULT---: ' + result
         except UnknownValueError:
             print 'ERR: Recognition error'
+            self.memory.raiseEvent("SpeechRecognition", "error")
         except RequestError, e:
             print 'ERR: ' + str(e)
         except socket.timeout:
@@ -414,22 +418,37 @@ class SpeechRecognitionModule(naoqi.ALModule):
         except:
             print 'ERR: Unknown, probably timeout ' + str(sys.exc_info()[0])
 
+
+
     def setAutoDetectionThreshold(self, threshold):
         self.autoDetectionThreshold = threshold
-
-    def setIdleReleaseTime(self, releaseTime):
-        self.idleReleaseTime = releaseTime
-
-    def setHoldTime(self, holdTime):
-        self.holdTime = holdTime
+        print 'SET: AutoDetection Threshold set to ' + str(self.autoDetectionThreshold)
 
     def setMaxRecordingDuration(self, duration):
-        self.recordingDuration = duration
+        self.recordingDuration = duration    
 
     def setLookaheadDuration(self, duration):
         self.lookaheadBufferSize = duration * SAMPLE_RATE
         self.preBuffer = []
         self.preBufferLength = 0
+        print 'SET: lookahead duration set to ' + str(duration)
+
+    def setIdleReleaseTime(self, releaseTime):
+        self.idleReleaseTime = releaseTime
+        print 'SET: Idle release time set to ' + str(releaseTime)
+
+    def setHoldTime(self, holdTime):
+        self.holdTime = holdTime
+        print 'SET: Hold time set to ' + str(holdTime)
+
+    def printInfo(self):
+        print "INFO"
+        print "language: "+ self.language
+        print "autoDetection: " + str(self.isAutoDetectionEnabled)
+        print 'Lookahead duration: ' + str(self.lookaheadBufferSize/SAMPLE_RATE)
+        print 'Idle release time: ' + str(self.idleReleaseTime)
+        print 'Hold time set to: ' + str(self.holdTime)
+
 
 # SpeechRecognition - end
 
