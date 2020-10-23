@@ -425,7 +425,7 @@ class SpeechRecognitionModule(naoqi.ALModule):
         print 'SET: AutoDetection Threshold set to ' + str(self.autoDetectionThreshold)
 
     def setMaxRecordingDuration(self, duration):
-        self.recordingDuration = duration    
+        self.recordingDuration = duration
 
     def setLookaheadDuration(self, duration):
         self.lookaheadBufferSize = duration * SAMPLE_RATE
